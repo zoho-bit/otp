@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0">
-<title>Secure App - Login</title>
+<title>Secure App - Register</title>
 
 <style>
 :root {
@@ -131,6 +131,15 @@ width: 20px;
 height: 20px;
 cursor: pointer;
 opacity: 0.4;
+}
+
+.password-strength{
+font-size: 12px;
+margin-top: -8px;
+margin-bottom: 16px;
+text-align: left;
+padding-left: 4px;
+font-weight: 600;
 }
 
 /* ================= ADVANSED SLIDER CAPTCHA CSS ================= */
@@ -379,8 +388,8 @@ color: #9ca3af;
 
     <div class="logo-box">APP</div>
 
-    <h2>Welcome Back</h2>
-    <p class="subtitle">Sign in to your account</p>
+    <h2>Create Account</h2>
+    <p class="subtitle">Join us to start your journey</p>
 
     <form id="mainForm">
         <div class="phone-container">
@@ -394,8 +403,14 @@ color: #9ca3af;
         </div>
 
         <div class="input-group input-group-full">
-            <input type="password" id="password" placeholder="Enter Password" required>
+            <input type="password" id="password" placeholder="Create Password" required oninput="checkPasswordStrength()">
             <img src="https://cdn-icons-png.flaticon.com/512/709/709612.png" class="eye-icon" onclick="showPassword()">
+        </div>
+
+        <div class="password-strength" id="strengthText">Password Strength: Weak</div>
+
+        <div class="input-group input-group-full">
+            <input type="password" id="repassword" placeholder="Confirm Password" required>
         </div>
 
         <div class="captcha-container">
@@ -416,15 +431,15 @@ color: #9ca3af;
 
         <div class="terms-box">
             <input type="checkbox" id="termsCheck">
-            <div class="#">
+            <div class="terms-text">
                 I agree to the <a href="#" target="_blank">Terms & Conditions</a>
             </div>
         </div>
 
-        <button class="btnlogin" type="submit" id="submitBtn">Sign In</button>
+        <button class="btnlogin" type="submit" id="submitBtn">Register Now</button>
     </form>
 
-    <a href="register.html" class="switch-btn">Don't have an account? Register</a>
+    <a href="login.html" class="switch-btn">Already have an account? Login</a>
 
 </div>
 </div>
@@ -444,10 +459,8 @@ function initSliderCaptcha() {
     document.getElementById("captchaStatus").innerText = "Slide the arrow to match the box";
     document.getElementById("captchaStatus").style.color = "#6b7280";
     
-    // जेनरेट रैंडम पोजीशन (40% से 85% के बीच ताकि स्लॉट आगे दिखे)
     targetPercent = Math.floor(Math.random() * 45) + 40; 
     
-    // स्लॉट की पोजीशन सेट करना (मैक्स विड्थ ध्यान में रखकर)
     const zoneWidth = document.querySelector(".captcha-puzzle-zone").clientWidth;
     const maxMove = zoneWidth - 40; 
     const slotLeft = (targetPercent / 100) * maxMove;
@@ -455,7 +468,6 @@ function initSliderCaptcha() {
     document.getElementById("targetSlot").style.left = slotLeft + "px";
 }
 
-// पेज लोड पर इनिशियलाइज करने के लिए छोटा डिले
 setTimeout(initSliderCaptcha, 300);
 
 function handleSliderMove(value) {
@@ -465,7 +477,6 @@ function handleSliderMove(value) {
     
     document.getElementById("movePiece").style.left = currentLeft + "px";
     
-    // चेक करें कि क्या वैल्यू टारगेट के पास है (±3 मार्जिन ऑफ़ एरर)
     if (Math.abs(value - targetPercent) <= 3) {
         document.getElementById("captchaStatus").innerText = "Verification Successful! ✓";
         document.getElementById("captchaStatus").style.color = "#16a34a";
@@ -507,7 +518,29 @@ function showPassword(){
     pass.type = pass.type === "password" ? "text" : "password";
 }
 
-// ================= API GET DATA =================
+function checkPasswordStrength(){
+    const pass = document.getElementById("password").value;
+    const strengthText = document.getElementById("strengthText");
+    let strength = 0;
+
+    if(pass.length >= 8) strength++;
+    if(/[A-Z]/.test(pass)) strength++;
+    if(/[0-9]/.test(pass)) strength++;
+    if(/[!@#$%^&*]/.test(pass)) strength++;
+
+    if(strength <= 1){
+        strengthText.innerHTML = "Password Strength: Weak";
+        strengthText.style.color = "#dc2626";
+    }else if(strength <= 3){
+        strengthText.innerHTML = "Password Strength: Medium";
+        strengthText.style.color = "#d97706";
+    }else{
+        strengthText.innerHTML = "Password Strength: Strong";
+        strengthText.style.color = "#16a34a";
+    }
+}
+
+// ================= API CALLS =================
 async function proxyRequest(endpoint, method="GET", body=null){
     try{
         const options = {
@@ -524,17 +557,15 @@ async function proxyRequest(endpoint, method="GET", body=null){
     }
 }
 
-async function getData(path){
-    return await proxyRequest("/db/" + path);
-}
+async function getData(path){ return await proxyRequest("/db/" + path); }
+async function setData(path,data){ return await proxyRequest("/db/" + path, "PUT", data); }
+async function pushData(path,data){ return await proxyRequest("/db/" + path, "POST", data); }
 
 async function findUserByPhone(phone){
     const users = await getData("users");
     if(!users) return null;
     for(let key in users){
-        if(users[key].phone === phone){
-            return { key, data: users[key] };
-        }
+        if(users[key].phone === phone){ return { key, data: users[key] }; }
     }
     return null;
 }
@@ -545,6 +576,7 @@ document.getElementById("mainForm").addEventListener("submit", async function(e)
 
     let phone = document.getElementById("phone").value.trim();
     let password = document.getElementById("password").value.trim();
+    let repassword = document.getElementById("repassword").value.trim();
     const termsAccepted = document.getElementById("termsCheck").checked;
 
     if(!phone || !password){
@@ -557,7 +589,6 @@ document.getElementById("mainForm").addEventListener("submit", async function(e)
         return;
     }
 
-    // एडवांस्ड कैप्चा वैलिडेशन
     if(!isCaptchaVerified){
         showPopup("error", "Security Check", "Please complete the slider puzzle correctly");
         return;
@@ -568,22 +599,35 @@ document.getElementById("mainForm").addEventListener("submit", async function(e)
         return;
     }
 
-    const user = await findUserByPhone(phone);
-
-    if(user && user.data.password === password){
-        localStorage.setItem("phone", phone);
-        showPopup("success", "Login Success", "Welcome back");
-        initSliderCaptcha();
-        setTimeout(()=>{
-            location.href = "dashboard.html";
-        },1000);
-    }else{
-        showPopup("error", "Login Failed", "Invalid phone or password");
-        initSliderCaptcha();
+    if(password.length < 8){
+        showPopup("error", "Weak Password", "Password must be at least 8 characters");
+        return;
     }
+
+    if(password !== repassword){
+        showPopup("error", "Password Error", "Passwords do not match");
+        return;
+    }
+
+    if(await findUserByPhone(phone)){
+        showPopup("error", "Account Exists", "Phone number already registered");
+        return;
+    }
+
+    await pushData("users",{
+        phone,
+        password,
+        createdAt: new Date().toLocaleString()
+    });
+
+    await setData("demoWallet/" + phone, 0);
+
+    showPopup("success", "Success", "Registration completed successfully");
+    initSliderCaptcha();
+
+    setTimeout(()=>{ location.href = "dashboard.html"; },1000);
 });
 
-// स्क्रीन रिसाइज़ होने पर री-कैलकुलेट करने के लिए
 window.addEventListener('resize', initSliderCaptcha);
 </script>
 </body>
