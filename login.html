@@ -1,1 +1,590 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0">
+<title>Secure App - Login</title>
 
+<style>
+:root {
+    --primary: linear-gradient(135deg, #4f46e5, #2563eb);
+    --primary-hover: linear-gradient(135deg, #4338ca, #1d4ed8);
+    --bg: #f3f4f6;
+    --card-bg: #ffffff;
+    --text-main: #1f2937;
+    --text-muted: #6b7280;
+    --border: #e5e7eb;
+}
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+body{
+background: var(--bg);
+color: var(--text-main);
+display: flex;
+justify-content: center;
+align-items: center;
+min-height: 100vh;
+padding: 20px;
+}
+
+#authPage{
+width: 100%;
+display: flex;
+justify-content: center;
+align-items: center;
+}
+
+.login-container{
+width: 100%;
+max-width: 400px;
+background: var(--card-bg);
+border-radius: 24px;
+padding: 35px 30px;
+box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+text-align: center;
+}
+
+.logo-box{
+background: var(--primary);
+width: 70px;
+height: 70px;
+border-radius: 18px;
+margin: 0 auto 20px;
+display: flex;
+justify-content: center;
+align-items: center;
+box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+color: white;
+font-size: 24px;
+font-weight: 800;
+}
+
+h2{
+font-size: 24px;
+font-weight: 700;
+margin-bottom: 6px;
+}
+
+.subtitle{
+color: var(--text-muted);
+font-size: 14px;
+margin-bottom: 25px;
+}
+
+.phone-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.country-select {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: #f9fafb;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 0 14px;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.input-group{
+flex: 1;
+background: #f9fafb;
+border-radius: 14px;
+padding: 14px 16px;
+display: flex;
+align-items: center;
+border: 1px solid var(--border);
+transition: all 0.2s ease;
+}
+
+.input-group:focus-within {
+    border-color: #2563eb;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+.input-group input{
+border: none;
+outline: none;
+width: 100%;
+font-size: 15px;
+font-weight: 500;
+background: transparent;
+color: var(--text-main);
+}
+
+.input-group-full {
+    margin-bottom: 16px;
+}
+
+.eye-icon{
+width: 20px;
+height: 20px;
+cursor: pointer;
+opacity: 0.4;
+}
+
+/* ================= ADVANSED SLIDER CAPTCHA CSS ================= */
+.captcha-container {
+    margin: 20px 0;
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+}
+
+.captcha-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 12px;
+}
+
+.captcha-puzzle-zone {
+    height: 60px;
+    background: #e2e8f0;
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.captcha-bg-text {
+    font-size: 14px;
+    color: #94a3b8;
+    font-weight: bold;
+    letter-spacing: 1px;
+    user-select: none;
+}
+
+.captcha-target-slot {
+    width: 40px;
+    height: 40px;
+    background: rgba(37, 99, 235, 0.15);
+    border: 2px dashed #2563eb;
+    position: absolute;
+    border-radius: 8px;
+    top: 10px;
+}
+
+.captcha-movable-piece {
+    width: 40px;
+    height: 40px;
+    background: #2563eb;
+    color: white;
+    font-size: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    border-radius: 8px;
+    top: 10px;
+    left: 0;
+    cursor: grab;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    font-weight: bold;
+    user-select: none;
+}
+
+.slider-track {
+    margin-top: 15px;
+    height: 12px;
+    background: #cbd5e1;
+    border-radius: 6px;
+    position: relative;
+}
+
+.slider-input {
+    width: 100%;
+    position: absolute;
+    top: -4px;
+    left: 0;
+    background: transparent;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+    outline: none;
+}
+
+.slider-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #4f46e5;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: background 0.2s;
+}
+
+.slider-input::-webkit-slider-thumb:hover {
+    background: #2563eb;
+}
+
+.captcha-status {
+    margin-top: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: left;
+}
+
+.terms-box{
+display: flex;
+align-items: flex-start;
+gap: 10px;
+margin-bottom: 20px;
+text-align: left;
+}
+
+.terms-box input{
+margin-top: 3px;
+accent-color: #2563eb;
+width: 16px;
+height: 16px;
+}
+
+.terms-text{
+font-size: 13px;
+color: var(--text-muted);
+line-height: 1.5;
+}
+
+.terms-text a{
+color: #2563eb;
+font-weight: 600;
+text-decoration: none;
+}
+
+.btnlogin{
+width: 100%;
+background: var(--primary);
+border: none;
+color: #fff;
+padding: 15px;
+border-radius: 14px;
+font-size: 16px;
+font-weight: 600;
+box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+cursor: pointer;
+transition: all 0.2s;
+}
+
+.btnlogin:hover{
+background: var(--primary-hover);
+transform: translateY(-1px);
+}
+
+.switch-btn{
+margin-top: 20px;
+color: #2563eb;
+font-size: 14px;
+font-weight: 600;
+cursor: pointer;
+text-decoration: none;
+display: inline-block;
+}
+
+/* प्रीमियम कस्टम पॉपअप */
+.custom-popup{
+position: fixed;
+top: 20px;
+left: 50%;
+transform: translateX(-50%) translateY(-30px);
+background: #fff;
+width: 90%;
+max-width: 360px;
+border-radius: 16px;
+padding: 16px;
+display: flex;
+align-items: center;
+gap: 12px;
+box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+z-index: 99999;
+opacity: 0;
+visibility: hidden;
+transition: 0.3s ease;
+border: 1px solid var(--border);
+}
+
+.custom-popup.show{
+opacity: 1;
+visibility: visible;
+transform: translateX(-50%) translateY(0);
+}
+
+.popup-icon{
+width: 36px;
+height: 36px;
+border-radius: 50%;
+background: #16a34a;
+color: #fff;
+display: flex;
+justify-content: center;
+align-items: center;
+font-size: 18px;
+font-weight: bold;
+flex-shrink: 0;
+}
+
+.popup-text{
+flex: 1;
+text-align: left;
+}
+
+.popup-title{
+font-size: 14px;
+font-weight: 700;
+color: var(--text-main);
+}
+
+.popup-message{
+font-size: 12px;
+color: var(--text-muted);
+}
+
+.popup-close{
+cursor: pointer;
+font-size: 18px;
+color: #9ca3af;
+}
+</style>
+</head>
+
+<body>
+
+<div class="custom-popup" id="popup">
+    <div class="popup-icon" id="popupIcon">✓</div>
+    <div class="popup-text">
+        <div class="popup-title" id="popupTitle">Success</div>
+        <div class="popup-message" id="popupMessage">Action completed</div>
+    </div>
+    <div class="popup-close" onclick="closePopup()">×</div>
+</div>
+
+<div id="authPage">
+<div class="login-container">
+
+    <div class="logo-box">APP</div>
+
+    <h2>Welcome Back</h2>
+    <p class="subtitle">Sign in to your account</p>
+
+    <form id="mainForm">
+        <div class="phone-container">
+            <div class="country-select">
+                <span>🇮🇳</span>
+                <span>+91</span>
+            </div>
+            <div class="input-group">
+                <input type="number" id="phone" placeholder="Enter Phone Number" required>
+            </div>
+        </div>
+
+        <div class="input-group input-group-full">
+            <input type="password" id="password" placeholder="Enter Password" required>
+            <img src="https://cdn-icons-png.flaticon.com/512/709/709612.png" class="eye-icon" onclick="showPassword()">
+        </div>
+
+        <div class="captcha-container">
+            <div class="captcha-header">
+                <span>Security Verification</span>
+                <span style="cursor:pointer; color:#2563eb;" onclick="initSliderCaptcha()">↻ Refresh</span>
+            </div>
+            <div class="captcha-puzzle-zone">
+                <div class="captcha-bg-text">SLIDE TO VERIFY</div>
+                <div class="captcha-target-slot" id="targetSlot"></div>
+                <div class="captcha-movable-piece" id="movePiece">➔</div>
+            </div>
+            <div class="slider-track">
+                <input type="range" min="0" max="100" value="0" class="slider-input" id="captchaSlider" oninput="handleSliderMove(this.value)">
+            </div>
+            <div class="captcha-status" id="captchaStatus" style="color: #6b7280;">Slide the arrow to match the box</div>
+        </div>
+
+        <div class="terms-box">
+            <input type="checkbox" id="termsCheck">
+            <div class="#">
+                I agree to the <a href="#" target="_blank">Terms & Conditions</a>
+            </div>
+        </div>
+
+        <button class="btnlogin" type="submit" id="submitBtn">Sign In</button>
+    </form>
+
+    <a href="register.html" class="switch-btn">Don't have an account? Register</a>
+
+</div>
+</div>
+
+<script>
+const PROXY_URL = "https://fjseur.sawanenter7209.workers.dev";
+let popupTimer;
+
+// ================= SLIDER CAPTCHA LOGIC =================
+let targetPercent = 0;
+let isCaptchaVerified = false;
+
+function initSliderCaptcha() {
+    isCaptchaVerified = false;
+    document.getElementById("captchaSlider").value = 0;
+    document.getElementById("movePiece").style.left = "0px";
+    document.getElementById("captchaStatus").innerText = "Slide the arrow to match the box";
+    document.getElementById("captchaStatus").style.color = "#6b7280";
+    
+    // जेनरेट रैंडम पोजीशन (40% से 85% के बीच ताकि स्लॉट आगे दिखे)
+    targetPercent = Math.floor(Math.random() * 45) + 40; 
+    
+    // स्लॉट की पोजीशन सेट करना (मैक्स विड्थ ध्यान में रखकर)
+    const zoneWidth = document.querySelector(".captcha-puzzle-zone").clientWidth;
+    const maxMove = zoneWidth - 40; 
+    const slotLeft = (targetPercent / 100) * maxMove;
+    
+    document.getElementById("targetSlot").style.left = slotLeft + "px";
+}
+
+// पेज लोड पर इनिशियलाइज करने के लिए छोटा डिले
+setTimeout(initSliderCaptcha, 300);
+
+function handleSliderMove(value) {
+    const zoneWidth = document.querySelector(".captcha-puzzle-zone").clientWidth;
+    const maxMove = zoneWidth - 40;
+    const currentLeft = (value / 100) * maxMove;
+    
+    document.getElementById("movePiece").style.left = currentLeft + "px";
+    
+    // चेक करें कि क्या वैल्यू टारगेट के पास है (±3 मार्जिन ऑफ़ एरर)
+    if (Math.abs(value - targetPercent) <= 3) {
+        document.getElementById("captchaStatus").innerText = "Verification Successful! ✓";
+        document.getElementById("captchaStatus").style.color = "#16a34a";
+        isCaptchaVerified = true;
+    } else {
+        document.getElementById("captchaStatus").innerText = "Keep sliding to match...";
+        document.getElementById("captchaStatus").style.color = "#d97706";
+        isCaptchaVerified = false;
+    }
+}
+
+// ================= POPUP =================
+function showPopup(type,title,message){
+    clearTimeout(popupTimer);
+    const popup = document.getElementById("popup");
+    const icon = document.getElementById("popupIcon");
+    document.getElementById("popupTitle").innerText = title;
+    document.getElementById("popupMessage").innerText = message;
+
+    if(type === "success"){
+        icon.innerHTML = "✓";
+        icon.style.background = "#16a34a";
+    }else{
+        icon.innerHTML = "!";
+        icon.style.background = "#dc2626";
+    }
+    popup.classList.add("show");
+    popupTimer = setTimeout(()=>{
+        popup.classList.remove("show");
+    },2500);
+}
+
+function closePopup(){
+    document.getElementById("popup").classList.remove("show");
+}
+
+function showPassword(){
+    let pass = document.getElementById("password");
+    pass.type = pass.type === "password" ? "text" : "password";
+}
+
+// ================= API GET DATA =================
+async function proxyRequest(endpoint, method="GET", body=null){
+    try{
+        const options = {
+            method,
+            headers:{"Content-Type":"application/json"}
+        };
+        if(body) options.body = JSON.stringify(body);
+        const res = await fetch(PROXY_URL + endpoint, options);
+        if(!res.ok) throw new Error("Server Error");
+        const text = await res.text();
+        return text ? JSON.parse(text) : null;
+    }catch(e){
+        return null;
+    }
+}
+
+async function getData(path){
+    return await proxyRequest("/db/" + path);
+}
+
+async function findUserByPhone(phone){
+    const users = await getData("users");
+    if(!users) return null;
+    for(let key in users){
+        if(users[key].phone === phone){
+            return { key, data: users[key] };
+        }
+    }
+    return null;
+}
+
+// ================= FORM SUBMIT =================
+document.getElementById("mainForm").addEventListener("submit", async function(e){
+    e.preventDefault();
+
+    let phone = document.getElementById("phone").value.trim();
+    let password = document.getElementById("password").value.trim();
+    const termsAccepted = document.getElementById("termsCheck").checked;
+
+    if(!phone || !password){
+        showPopup("error", "Required", "Please fill in all fields");
+        return;
+    }
+
+    if(phone.length !== 10){
+        showPopup("error", "Invalid Phone", "Enter valid 10 digit phone number");
+        return;
+    }
+
+    // एडवांस्ड कैप्चा वैलिडेशन
+    if(!isCaptchaVerified){
+        showPopup("error", "Security Check", "Please complete the slider puzzle correctly");
+        return;
+    }
+
+    if(!termsAccepted){
+        showPopup("error", "Terms Required", "Please accept Terms & Conditions");
+        return;
+    }
+
+    const user = await findUserByPhone(phone);
+
+    if(user && user.data.password === password){
+        localStorage.setItem("phone", phone);
+        showPopup("success", "Login Success", "Welcome back");
+        initSliderCaptcha();
+        setTimeout(()=>{
+            location.href = "dashboard.html";
+        },1000);
+    }else{
+        showPopup("error", "Login Failed", "Invalid phone or password");
+        initSliderCaptcha();
+    }
+});
+
+// स्क्रीन रिसाइज़ होने पर री-कैलकुलेट करने के लिए
+window.addEventListener('resize', initSliderCaptcha);
+</script>
+</body>
+</html>
