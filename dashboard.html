@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0">
+    <title>Sawan SMS - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 flex min-h-screen relative">
+
+    <aside class="fixed top-0 left-0 h-full bg-white shadow-lg z-40 hidden md:flex md:flex-col border-r border-gray-100 w-64">
+        <div class="border-b border-gray-100 flex-shrink-0 px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-10 h-10 bg-gradient-to-br from-[#d97757] to-amber-500 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
+                        <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" class="text-white" height="20" width="20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill="none" d="M0 0h24v24H0z"></path>
+                            <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"></path>
+                        </svg>
+                    </div>
+                    <div class="min-w-0">
+                        <span class="text-gray-700 font-bold text-lg">Dashboard</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="flex-1 overflow-y-auto overflow-x-hidden py-6">
+            <ul class="space-y-2 px-4">
+                <li>
+                    <a class="flex items-center px-4 py-3 rounded-xl transition-all border border-transparent bg-gradient-to-r from-orange-50 to-amber-50 text-[#d97757] font-medium shadow-md border-orange-200" href="/dashboard">
+                        <span class="text-sm font-medium truncate flex-1">Overview</span>
+                        <div class="flex items-center ml-auto">
+                            <span class="w-2 h-2 rounded-full bg-[#d97757] mr-1 animate-pulse"></span>
+                        </div>
+                    </a>
+                </li>
+                <li><a class="flex items-center px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition" href="buynumber.html"><span class="text-sm font-medium">Buy Number</span></a></li>
+               <!--<li><a class="flex items-center px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition" href="buy-account.html"><span class="text-sm font-medium">Buy Account</span></a></li> -->
+                <li><a class="flex items-center px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition" href="only-qr.html"><span class="text-sm font-medium">Recharge</span></a></li>
+               <!-- <li><a class="flex items-center px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition" href="number-history.html"><span class="text-sm font-medium">Number History</span></a></li>-->
+                <li><a class="flex items-center px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition" href="transactions.html"><span class="text-sm font-medium">Transactions</span></a></li>
+              <!-- <li><a class="flex items-center px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition" href="api-gateway.html"><span class="text-sm font-medium">API Gateway</span></a></li>-->
+            </ul>
+        </nav>
+
+        <div class="border-t border-gray-100 flex-shrink-0 p-4">
+            <div class="bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl p-4 border border-orange-100 shadow-sm">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-[#d97757] to-amber-500 text-white rounded-xl flex items-center justify-center shadow-md flex-shrink-0 font-bold" id="userAvatar">
+                        U
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold text-gray-800 truncate" id="sideProfilePhone">Loading...</p>
+                        <p class="text-xs text-gray-500 truncate" id="sideProfileStatus">Verified User</p>
+                    </div>
+                    <button onclick="logout()" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-white rounded-lg transition" title="Logout">
+                        <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="16" width="16" xmlns="http://www.w3.org/2000/svg">
+                            <path fill="none" d="M0 0h24v24H0z"></path>
+                            <path d="m17 7-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <div id="mobileSidebar" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 md:hidden transition-all duration-300 opacity-0 pointer-events-none"></div>
+    <div id="mobileSidebarContainer" class="fixed top-0 left-0 h-full w-72 bg-white shadow-xl z-50 md:hidden transition-all duration-300 ease-in-out border-r border-gray-100 -translate-x-full">
+        <div class="flex flex-col h-full">
+            <div class="px-4 py-4 border-b border-gray-100 flex items-center justify-between">
+                <span class="text-gray-700 font-bold text-base">Menu Options</span>
+                <button onclick="toggleMobileMenu()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-50 text-gray-500">✕</button>
+            </div>
+            <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+                <a class="flex items-center px-3 py-2.5 rounded-lg bg-gradient-to-r from-orange-50 to-amber-50 text-[#d97757] font-medium" href="/dashboard">Overview</a>
+                <a class="flex items-center px-3 py-2.5 rounded-lg text-gray-600" href="buynumber.html">Buy Number</a>
+               <!-- <a class="flex items-center px-3 py-2.5 rounded-lg text-gray-600" href="buy-account.html">Buy Account</a>-->
+                <a class="flex items-center px-3 py-2.5 rounded-lg text-gray-600" href="only-qr.html">Recharge</a>
+            </nav>
+        </div>
+    </div>
+
+    <main class="flex flex-col min-h-screen transition-all duration-300 ease-in-out w-full md:pl-64">
+        
+        <div class="bg-white border-b border-gray-100 py-3 px-4 sm:py-4 sm:px-6 md:px-8 flex items-center justify-between sticky top-0 z-30 shadow-sm backdrop-blur-sm">
+            <div class="flex items-center gap-3">
+                <button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-lg hover:bg-gray-50 text-gray-600">
+                    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="20" width="20" xmlns="http://www.w3.org/2000/svg">
+                        <path fill="none" d="M0 0h24v24H0z"></path><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path>
+                    </svg>
+                </button>
+                <h2 class="text-lg font-bold text-gray-800" id="welcomeUser">Welcome Panel</h2>
+            </div>
+
+            <div class="flex items-center gap-2 bg-emerald-50 border border-emerald-100 px-3.5 py-1.5 rounded-xl shadow-sm">
+                <span class="text-[11px] font-bold text-emerald-600 uppercase tracking-wider hidden sm:inline">Balance:</span>
+                <span class="text-sm font-extrabold text-emerald-700" id="topWalletBalance">₹0.00</span>
+            </div>
+        </div>
+
+        <div class="p-4 sm:p-6 md:p-8 space-y-6">
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <div class="bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden transition-transform hover:scale-[1.01]">
+                    <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-white/10 rounded-full blur-2xl"></div>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs text-emerald-100 font-semibold uppercase tracking-wider">Available Funds</p>
+                            <h3 class="text-3xl font-black mt-1 tracking-tight" id="mainWalletCard">₹0.00</h3>
+                        </div>
+                        <div class="p-2 bg-white/15 rounded-xl backdrop-blur-md">
+                            💰
+                        </div>
+                    </div>
+                    <div class="mt-5 pt-4 border-t border-white/10 flex justify-between items-center">
+                        <span class="text-[11px] text-emerald-100/80 font-medium" id="walletUserRef">ID: None</span>
+                        <a href="only-qr.html" class="bg-white text-teal-700 px-4 py-1.5 rounded-xl text-xs font-bold shadow-lg hover:bg-emerald-50 transition active:scale-95">
+                            + Add Fund
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Rented Numbers</p>
+                            <h3 class="text-2xl font-extrabold text-gray-800 mt-1">Active Logs</h3>
+                        </div>
+                        <span class="text-xl p-2 bg-orange-50 text-[#d97757] rounded-xl">📱</span>
+                    </div>
+                    <div class="mt-4">
+                        <a href="#" class="text-xs font-bold text-[#d97757] hover:underline flex items-center gap-1">
+                            Check History logs &rarr;
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Asset Inventory</p>
+                            <h3 class="text-2xl font-extrabold text-gray-800 mt-1">Bulk Profiles</h3>
+                        </div>
+                        <span class="text-xl p-2 bg-amber-50 text-amber-600 rounded-xl">👥</span>
+                    </div>
+                    <div class="mt-4">
+                        <a href="account-history.html" class="text-xs font-bold text-amber-600 hover:underline flex items-center gap-1">
+                            Manage asset inventory &rarr;
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+                <h3 class="text-base font-bold text-gray-800 mb-4">Quick Operations Platform</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button onclick="location.href='buynumber.html'" class="flex items-center justify-center p-4 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold rounded-xl shadow-md hover:opacity-95 transition active:scale-95">
+                        Rent Dynamic OTP Number
+                    </button>
+                    <button onclick="location.href='#'" class="flex items-center justify-center p-4 bg-gray-800 text-white font-bold rounded-xl shadow-md hover:bg-gray-900 transition active:scale-95">
+                        Purchase Bulk Configured Accounts
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // Aapka direct Worker base API URL path endpoint
+        const PROXY_URL = "https://fjseur.sawanenter7209.workers.dev";
+        
+        // Mobile Sidebar Drawer toggler controls
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('mobileSidebar');
+            const container = document.getElementById('mobileSidebarContainer');
+            
+            if(container.classList.contains('-translate-x-full')) {
+                container.classList.remove('-translate-x-full');
+                sidebar.classList.remove('opacity-0', 'pointer-events-none');
+            } else {
+                container.classList.add('-translate-x-full');
+                sidebar.classList.add('opacity-0', 'pointer-events-none');
+            }
+        }
+        
+        document.getElementById('mobileSidebar').addEventListener('click', toggleMobileMenu);
+
+        // Security Authentication check layer
+        function checkUserAuth() {
+            const sessionPhone = localStorage.getItem("phone");
+            // Agar session store me login phone nahi milta to index/login page par redirect karega
+            if (!sessionPhone) {
+                alert("Session expired or missing! Please sign in again.");
+                location.href = "numberlogin.html";
+                return null;
+            }
+            return sessionPhone;
+        }
+
+        // Live Dynamic async data loading mechanism
+        async function loadDashboardWallet() {
+            const activePhone = checkUserAuth();
+            if(!activePhone) return;
+
+            // UI interface values loading placeholders setup
+            document.getElementById('welcomeUser').innerText = `Hello, +91 ${activePhone}`;
+            document.getElementById('sideProfilePhone').innerText = `+91 ${activePhone}`;
+            document.getElementById('walletUserRef').innerText = `Ref: M-${activePhone.substring(6)}`;
+            document.getElementById('userAvatar').innerText = activePhone.substring(0, 2);
+
+            try {
+                // Dynamic worker route context hitting custom endpoints (/db/demoWallet/phone)
+                const targetEndpoint = `${PROXY_URL}/db/demoWallet/${activePhone}`;
+                
+                const response = await fetch(targetEndpoint, {
+                    method: "GET",
+                    headers: { "Content-Type": "application/json" }
+                });
+
+                if (!response.ok) throw new Error("API worker status fault connection error");
+
+                const walletFunds = await response.json();
+                
+                // Parse and dynamic safe fallbacks if wallet value is blank or uninitiated
+                let activeBalance = 0;
+                if(walletFunds !== null && walletFunds !== undefined) {
+                    activeBalance = parseFloat(walletFunds);
+                }
+
+                // Balance formats optimization rules update directly to DOM element channels
+                const processedBalanceString = `₹${activeBalance.toFixed(2)}`;
+                
+                // Real-time synchronization values update loops
+                document.getElementById('topWalletBalance').innerText = processedBalanceString;
+                document.getElementById('mainWalletCard').innerText = processedBalanceString;
+
+            } catch (error) {
+                console.error("Worker API Synchronization Error: ", error);
+                // System offline UI structural handling
+                document.getElementById('topWalletBalance').innerText = "₹--.--";
+                document.getElementById('mainWalletCard').innerText = "Offline Sync Error";
+            }
+        }
+
+        // System Logout profile trigger sequence
+        function logout() {
+            localStorage.removeItem("phone");
+            location.href = "login.html";
+        }
+
+        // Initialize sync cycle execution pipeline
+        window.addEventListener('DOMContentLoaded', loadDashboardWallet);
+    </script>
+</body>
+</html>
