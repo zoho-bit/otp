@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AMUL Recharge</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    body { font-family: 'Segoe UI', Roboto, sans-serif; }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -12px rgb(0 0 0 / 0.5); }
+    .amount-btn.active {
+      background: #e61e2a !important;
+      color: white !important;
+      border-color: #e61e2a !important;
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen">
+
+  <div class="flex flex-col md:flex-row min-h-screen">
+    
+    <!-- Sidebar -->
+    <div class="w-full md:w-72 bg-gray-900 p-6 border-b md:border-b-0 md:border-r border-gray-800 flex flex-col justify-between gap-6">
+      <div>
+        <h1 class="text-3xl font-bold text-red-500 mb-8 tracking-wide"> Recharge</h1>
+        
+        <div class="bg-gray-800 rounded-2xl p-6 mb-6 border border-gray-700 shadow-inner">
+          <p class="text-gray-400 text-xs uppercase tracking-widest font-semibold">Wallet Balance</p>
+          <h2 id="topWalletBalance" class="text-3xl font-black mt-2 text-green-400 tracking-tight">₹0</h2>
+          <p id="sideProfilePhone" class="text-xs text-gray-500 truncate mt-2">Loading User...</p>
+        </div>
+
+        <div class="bg-gray-800 rounded-2xl p-6">
+          <p class="text-red-400 text-sm font-medium">Recharge Service</p>
+          <h2 class="text-2xl font-bold mt-1"> Wallet</h2>
+        </div>
+      </div>
+      
+      <div>
+        <a href="dashboard.html" class="flex items-center justify-center gap-2 w-full bg-gray-800 hover:bg-gray-700 py-3 rounded-xl font-medium text-sm transition">
+          ← Back to Dashboard
+        </a>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 p-4 md:p-8 overflow-auto bg-gray-950">
+      <div class="max-w-2xl mx-auto">
+
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-8">
+          <h1 class="text-3xl font-bold text-white">Recharge Wallet</h1>
+          <div class="text-right">
+            <p class="text-xs text-gray-400">Main Balance</p>
+            <h2 id="walletBalance" class="text-4xl font-black text-green-400">₹0</h2>
+          </div>
+        </div>
+
+        <div class="bg-gray-900 rounded-3xl p-6 md:p-8 card border border-gray-700">
+          <div class="title text-xl font-bold mb-6 text-white">Select Recharge Amount</div>
+          
+          <div class="grid grid-cols-3 gap-4 mb-8" id="amountGrid"></div>
+          
+          <input type="number" id="customAmount" 
+                 class="w-full h-16 bg-gray-800 border border-gray-700 rounded-2xl px-6 text-2xl font-bold focus:outline-none focus:border-red-500 text-white" 
+                 placeholder="Enter Custom Amount">
+
+          <button onclick="openQRPage()" 
+                  class="mt-8 w-full h-16 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 rounded-2xl font-bold text-xl active:scale-95 transition">
+            PROCEED TO PAY →
+          </button>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="mt-10">
+          <h3 class="text-xl font-bold mb-5 text-white">Recent Transactions</h3>
+          <div id="historyList" class="space-y-4"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- QR Slide Page -->
+  <div class="slide-page fixed inset-0 bg-gray-950 z-50 translate-x-full transition-all duration-500" id="qrPage">
+    <div class="top-bar flex items-center px-6 py-5 bg-gray-900 border-b border-gray-700">
+      <span onclick="closeQRPage()" class="text-4xl cursor-pointer mr-4">←</span>
+      <h2 class="text-2xl font-bold">Scan QR to Pay</h2>
+    </div>
+    <div class="p-6" id="qrContent"></div>
+  </div>
+
+  <!-- Processing Screen -->
+  <div class="processing-screen fixed inset-0 bg-black/95 z-[100] hidden items-center justify-center flex-col" id="processingScreen">
+    <div class="spinner w-20 h-20 border-8 border-gray-700 border-t-red-500 rounded-full animate-spin mb-6"></div>
+    <div class="text-2xl font-bold text-white">Payment Processing...</div>
+    <div class="text-gray-400 mt-3" id="processingMsg">Waiting for admin verification</div>
+  </div>
+
+  <script>
+    const PROXY_URL = "https://fjseur.sawanenter7209.workers.dev";
+    let currentPhone = localStorage.getItem("phone") || "";
+    let selectedAmount = 0;
+
+    // Tailwind Script Already Included
+
+    async function getData(path) {
+      try {
+        const res = await fetch(PROXY_URL + "/db/" + path);
+        return res.ok ? await res.json() : {};
+      } catch(e) { return {}; }
+    }
+
+    async function setData(path, value) {
+      try {
+        await fetch(PROXY_URL + "/db/" + path, {
+          method: "PUT",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(value)
+        });
+      } catch(e) {}
+    }
+
+    async function pushData(path, data) {
+      try {
+        await fetch(PROXY_URL + "/db/" + path, {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(data)
+        });
+      } catch(e) {}
+    }
+
+    function showToast(message, type = "success") {
+      const toast = document.createElement("div");
+      toast.style.cssText = `position:fixed; top:20px; left:50%; transform:translateX(-50%); 
+        background:${type==='success'?'#16a34a':'#dc2626'}; color:white; padding:16px 24px; 
+        border-radius:9999px; font-weight:800; z-index:99999; box-shadow:0 15px 35px rgba(0,0,0,0.4);`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 2800);
+    }
+
+    async function loadWallet() {
+      if (!currentPhone) return;
+      const bal = await getData("demoWallet/" + currentPhone) || 0;
+      document.getElementById("walletBalance").innerText = "₹" + Number(bal).toFixed(0);
+      document.getElementById("topWalletBalance").innerText = "₹" + Number(bal).toFixed(0);
+      document.getElementById("sideProfilePhone").innerText = `+91 ${currentPhone}`;
+    }
+
+    // Amount Grid
+    const amounts = [100, 200, 500, 1000, 2000, 5000, 10000];
+    const grid = document.getElementById("amountGrid");
+    amounts.forEach(am => {
+      grid.innerHTML += `
+        <div onclick="selectAmount(this, ${am})" 
+             class="amount-btn cursor-pointer bg-gray-800 border-2 border-gray-700 h-20 rounded-2xl flex items-center justify-center text-2xl font-bold">
+          ₹${am}
+        </div>`;
+    });
+
+    window.selectAmount = (el, amt) => {
+      selectedAmount = amt;
+      document.getElementById("customAmount").value = amt;
+      document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('active'));
+      el.classList.add('active');
+    };
+
+    // Open QR
+    window.openQRPage = async () => {
+      let amt = document.getElementById("customAmount").value;
+      if (!amt || Number(amt) <= 0) return showToast("Please enter valid amount", "error");
+
+      selectedAmount = Number(amt);
+
+      const settings = await getData("paymentSettings") || {};
+      const upiId = settings.upi ? settings.upi.upiId : "yourupi@upi";
+
+      const upiLink = `upi://pay?pa=${upiId}&pn=AMUL%20Recharge&am=${selectedAmount}&cu=INR&tr=${Date.now()}`;
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(upiLink)}`;
+
+      const html = `
+        <div class="text-center">
+          <h2 class="text-2xl font-bold mb-6">Pay ₹${selectedAmount}</h2>
+          <img src="${qrUrl}" class="mx-auto rounded-2xl shadow-2xl" style="width:280px;height:280px;">
+          <p class="mt-6 font-bold text-red-400">${upiId}</p>
+          <input type="text" id="utrInput" class="w-full mt-8 h-14 bg-gray-800 border border-gray-700 rounded-2xl px-6 text-lg" placeholder="Enter UTR Number">
+          <button onclick="submitProof()" class="mt-6 w-full h-16 bg-red-600 hover:bg-red-700 rounded-2xl font-bold text-xl">SUBMIT PAYMENT PROOF</button>
+        </div>
+      `;
+
+      document.getElementById("qrContent").innerHTML = html;
+      document.getElementById("qrPage").classList.remove('translate-x-full');
+    };
+
+    window.closeQRPage = () => {
+      document.getElementById("qrPage").classList.add('translate-x-full');
+    };
+
+    window.submitProof = async () => {
+      const utr = document.getElementById("utrInput").value.trim();
+      if (!utr) return showToast("Enter UTR Number", "error");
+
+      const requestData = {
+        phone: currentPhone,
+        amount: selectedAmount,
+        channel: "qr",
+        utr: utr,
+        status: "pending",
+        time: new Date().toLocaleString()
+      };
+
+      await pushData("depositRequests", requestData);
+      closeQRPage();
+
+      document.getElementById("processingScreen").classList.remove("hidden");
+      document.getElementById("processingMsg").innerText = "Waiting for admin approval...";
+
+      startLiveStatusCheck(utr);
+    };
+
+    function startLiveStatusCheck(utr) {
+      let attempts = 0;
+      const interval = setInterval(async () => {
+        attempts++;
+        const requests = await getData("depositRequests") || {};
+
+        for (let key in requests) {
+          const req = requests[key];
+          if (req.phone === currentPhone && req.utr === utr) {
+            if (req.status === "success") {
+              clearInterval(interval);
+              const currentBal = Number(await getData("demoWallet/" + currentPhone) || 0);
+              await setData("demoWallet/" + currentPhone, currentBal + Number(req.amount));
+              
+              document.getElementById("processingScreen").classList.add("hidden");
+              showToast(`₹${req.amount} Added Successfully!`, "success");
+              loadWallet();
+              loadHistory();
+              return;
+            } else if (req.status === "rejected") {
+              clearInterval(interval);
+              document.getElementById("processingScreen").classList.add("hidden");
+              showToast("Request Rejected", "error");
+              loadHistory();
+              return;
+            }
+          }
+        }
+
+        if (attempts >= 60) {
+          clearInterval(interval);
+          document.getElementById("processingScreen").classList.add("hidden");
+          showToast("Request under review. Check later.", "success");
+        }
+      }, 4000);
+    }
+
+    async function loadHistory() {
+      const requests = await getData("depositRequests") || {};
+      let html = "";
+      Object.values(requests).reverse().forEach(r => {
+        if (r.phone === currentPhone) {
+          const color = r.status === "success" ? "text-green-400" : r.status === "rejected" ? "text-red-400" : "text-yellow-400";
+          html += `
+            <div class="bg-gray-900 border border-gray-700 rounded-2xl p-5">
+              <div class="flex justify-between items-center">
+                <div>
+                  <span class="text-2xl font-bold">₹${r.amount}</span><br>
+                  <small class="text-gray-500">${r.time}</small>
+                </div>
+                <span class="${color} font-bold">${r.status.toUpperCase()}</span>
+              </div>
+            </div>`;
+        }
+      });
+      document.getElementById("historyList").innerHTML = html || `<p class="text-center text-gray-500 py-10">No transactions yet</p>`;
+    }
+
+    // Init
+    document.addEventListener("DOMContentLoaded", () => {
+      if (!currentPhone) {
+        showToast("Please login first!", "error");
+      }
+      loadWallet();
+      loadHistory();
+      setInterval(loadWallet, 5000);
+      setInterval(loadHistory, 8000);
+    });
+  </script>
+</body>
+</html>
